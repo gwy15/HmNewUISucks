@@ -4,6 +4,7 @@
 
 import re
 import gzip
+import zlib
 import json
 
 from mitmproxy import http
@@ -30,24 +31,21 @@ class ZjsnHelper:
 
     @catch
     def http_connect(self, flow):
-        print(f'connecting {flow.request.url}')
+        pass
 
     @catch
     def request(self, flow: http.HTTPFlow):
-        print(f'requesting {flow.request.url}')
-        # NOTICE: ignore for now
+        # print(f'requesting {flow.request.url}')
         if flow.request.url.find('index/getInitConfigs') > 0:
-            # self.onGetInitConfigs(flow)
-            pass
+            self.onGetInitConfigs(flow)
 
     @catch
     def response(self, flow: http.HTTPFlow):
         print(f'response host: {flow.request.host}')
         if re.match(self.VERSION_HOST, flow.request.host):
             self.onVersionCheck(flow)
-            return
-        if re.match(r'login(ios)\.jr\.moefantasy\.com', flow.request.host):
-            print(flow.response)
+        elif 'jr.moefantasy.com/active/getUserData/' in flow.request.url:
+            self.onActiveGetUserData(flow)
 
     def onGetInitConfigs(self, flow):
         '替换 getInitConfigs'
@@ -67,20 +65,23 @@ class ZjsnHelper:
         data['ResUrl'] = manifestUrl
         data['ResUrlWu'] = manifestUrl
         data['version']['DataVersion'] = dataVersion
-        data['version']['isMandatory'] = 0
+        # data['version']['isMandatory'] = 0
         data['version']['newVersionId'] = '3.8.0'
-        data['version']['hasNewVersion'] = 0
+        # data['version']['hasNewVersion'] = 0
 
         flow.response.set_text(json.dumps(data))
 
     def onActiveGetUserData(self, flow):
         print('replacing active/getUserData')
-        data = json.loads(flow.response.get_text())
+
+        data = json.loads(
+            zlib.decompress(flow.response.get_content()).decode())
 
         data['DataVersion'] = dataVersion
         data['ResVersion'] = resVersion
 
-        flow.response.set_text(json.dumps(data))
+        flow.response.set_content(
+            zlib.compress(json.dumps(data).encode()))
 
 
 def request(flow):
