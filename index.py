@@ -7,8 +7,7 @@ import hashlib
 import json
 import gzip
 
-# TODO: update
-packageUrl = 'http://192.168.137.1:8000/data/'
+packageUrl = 'https://rawgit.com/gwy15/HmNewUISucksData/master/data/'
 resVersion = '20180909' + '123456'
 
 

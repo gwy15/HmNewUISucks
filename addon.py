@@ -1,7 +1,7 @@
 '''
 实现 MITM 的主体插件
 '''
-
+import os
 import re
 import gzip
 import zlib
@@ -11,8 +11,7 @@ from mitmproxy import http
 
 dataVersion = '20180909' + '01'
 resVersion = '20180909' + '123456'
-# TODO: update static server
-manifestUrl = f'http://192.168.137.1:8000/cache/warshipgirlsr.manifest.gz'
+manifestUrl = 'https://github.com/gwy15/HmNewUISucksData/raw/master/warshipgirlsr.manifest.gz'
 
 
 def catch(func):
@@ -50,10 +49,15 @@ class ZjsnHelper:
     def onGetInitConfigs(self, flow):
         '替换 getInitConfigs'
         print('replacing getInitConfigs...')
-        flow.response = http.HTTPResponse.make(
-            200,
-            gzip.compress(open('cache/init.txt', 'rb').read())
-        )
+        if os.path.exists('cache/init.dat'):
+            with open('cache/init.dat', 'rb') as f:
+                data = f.read()
+        else:
+            data = gzip.compress(open('cache/init.txt', 'rb').read())
+            with open('cache/init.dat', 'wb') as f:
+                f.write(data)
+
+        flow.response = http.HTTPResponse.make(200, data)
 
     def onVersionCheck(self, flow: http.HTTPFlow):
         '替换 version check'
