@@ -69,9 +69,9 @@ class ZjsnHelper:
         data['ResUrl'] = manifestUrl
         data['ResUrlWu'] = manifestUrl
         data['version']['DataVersion'] = dataVersion
-        # data['version']['isMandatory'] = 0
+        data['version']['isMandatory'] = 0
         data['version']['newVersionId'] = '3.8.0'
-        # data['version']['hasNewVersion'] = 0
+        data['version']['hasNewVersion'] = 0
 
         flow.response.set_text(json.dumps(data))
 
