@@ -34,6 +34,9 @@ class ZjsnHelper:
 
     @catch
     def request(self, flow: http.HTTPFlow):
+        if 'jr.moefantasy.com' not in flow.request.host:
+            flow.response = http.HTTPResponse.make(404, b'')
+
         # print(f'requesting {flow.request.url}')
         if flow.request.url.find('index/getInitConfigs') > 0:
             self.onGetInitConfigs(flow)
